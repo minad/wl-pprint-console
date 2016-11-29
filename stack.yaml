@@ -1,0 +1,7 @@
+packages:
+- .
+- location: ../console-style
+  extra-dep: true
+- location: ../../../../wl-pprint-annotated
+  extra-dep: true
+resolver: nightly-2016-11-25
