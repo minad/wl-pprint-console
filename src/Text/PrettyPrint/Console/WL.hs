@@ -120,8 +120,8 @@ displayStyleCodeT f term = TL.toLazyText . displayStyleCode TL.fromString f term
 -- The annotations are mapped to a '[SetStyle]' array.
 hDisplayStyle :: MonadIO m => Handle -> (a -> [SetStyle]) -> SimpleDoc a -> m ()
 hDisplayStyle h f = hRunWithStyle h [] . displayDecoratedA push pop (liftIO . hPutStr h)
- where push  x = hSetStyle h (Save:f x)
-       pop   _ = hSetStyle h (Restore:[])
+ where push  x = setStyle (Save:f x)
+       pop   _ = setStyle (Restore:[])
 
 -- | Display a rendered document with ANSI escape sequences to 'stdout'.
 --
