@@ -20,7 +20,7 @@ ghc-options:
 dependencies:
 - base                >= 4.8 && < 5
 - console-style       >= 0.0.2.0 && < 0.1
-- wl-pprint-annotated >= 0.0.1.2 && < 0.1
+- wl-pprint-annotated >= 0.0.1.2 && < 0.0.2
 - mtl                 >= 2.2 && < 2.4
 - text                >= 0.11 && < 1.3
 
