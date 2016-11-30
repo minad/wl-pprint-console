@@ -29,7 +29,7 @@ library
   ghc-options: -Wall
   build-depends:
       base                >= 4.8 && < 5
-    , console-style       >= 0.0.2.0 && < 0.1
+    , console-style       >= 0.0.2 && < 0.0.3
     , wl-pprint-annotated >= 0.0.1.2 && < 0.1
     , mtl                 >= 2.2 && < 2.4
     , text                >= 0.11 && < 1.3
