@@ -126,7 +126,7 @@ hDisplayStyle :: MonadIO m => Handle -> (a -> [SetStyle]) -> SimpleDoc a -> m ()
 hDisplayStyle h f d = hRunWithStyle h [] $
   displayDecoratedA push pop str d >> applyStyle
   where push  x = changeStyle (Save:f x)
-        pop   _ = changeStyle (Restore:[])
+        pop   _ = changeStyle [Restore]
         str   s = applyStyle >> liftIO (hPutStr h s)
 
 -- | Display a rendered document with ANSI escape sequences to 'stdout'.
