@@ -99,9 +99,13 @@ displayHTMLS f = (++) . displayHTML id f
 --
 -- The annotations are mapped to a @[SetStyle]@ array.
 displayStyleCode :: Monoid o => (String -> o) -> (a -> [SetStyle]) -> Term -> SimpleDoc a -> o
-displayStyleCode f g term = runStyle term . displayDecoratedA push pop (pure . f)
- where push  x = f <$> styleCode (Save:g x)
-       pop   _ = f <$> styleCode (Restore:[])
+displayStyleCode f g t d = runStyle t $
+  mappend <$>
+  displayDecoratedA push pop str d <*>
+  (f <$> applyStyleCode)
+  where push  x = changeStyle (Save:g x) >> pure mempty
+        pop   _ = changeStyle [Restore]  >> pure mempty
+        str   s = f . (`mappend` s) <$> applyStyleCode
 
 -- | Display a rendered document with ANSI escape sequences and output a 'ShowS' function.
 --
@@ -119,9 +123,11 @@ displayStyleCodeT f term = TL.toLazyText . displayStyleCode TL.fromString f term
 --
 -- The annotations are mapped to a '[SetStyle]' array.
 hDisplayStyle :: MonadIO m => Handle -> (a -> [SetStyle]) -> SimpleDoc a -> m ()
-hDisplayStyle h f = hRunWithStyle h [] . displayDecoratedA push pop (liftIO . hPutStr h)
- where push  x = setStyle (Save:f x)
-       pop   _ = setStyle (Restore:[])
+hDisplayStyle h f d = hRunWithStyle h [] $
+  displayDecoratedA push pop str d >> applyStyle
+  where push  x = changeStyle (Save:f x)
+        pop   _ = changeStyle (Restore:[])
+        str   s = applyStyle >> liftIO (hPutStr h s)
 
 -- | Display a rendered document with ANSI escape sequences to 'stdout'.
 --
