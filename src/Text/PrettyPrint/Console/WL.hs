@@ -17,7 +17,7 @@
 module Text.PrettyPrint.Console.WL (
   module Text.PrettyPrint.Annotated.WL
 
-  -- * Display documents annotated with pair of strings
+  -- * Display documents annotated with pairs of strings
   , displayWrapped, displayWrappedT, displayWrappedS
 
   -- * Display as HTML
@@ -47,7 +47,7 @@ escapeHTML = concatMap $ \c ->
     '>' -> "&gt;"
     _   -> [c]
 
--- | Display a rendered document which is annotated with pairs of strings and
+-- | Display a rendered document which is annotated with pairs of strings @(String,String)@ and
 -- output a 'Monoid'.
 --
 -- The first element of the pair is prepended to the annotated region,
@@ -55,7 +55,7 @@ escapeHTML = concatMap $ \c ->
 displayWrapped :: Monoid o => (String -> o) -> SimpleDoc (String, String) -> o
 displayWrapped f = displayDecorated (f . fst) (f . snd) f
 
--- | Display a rendered document which is annotated with pairs of strings and
+-- | Display a rendered document which is annotated with pairs of strings @(String,String)@ and
 -- output 'Text'.
 --
 -- The first element of the pair is prepended to the annotated region,
@@ -63,7 +63,7 @@ displayWrapped f = displayDecorated (f . fst) (f . snd) f
 displayWrappedT :: SimpleDoc (String, String) -> TL.Text
 displayWrappedT = TL.toLazyText . displayWrapped TL.fromString
 
--- | Display a rendered document which is annotated with pairs of strings and
+-- | Display a rendered document which is annotated with pairs of strings @(String,String)@ and
 -- output a 'ShowS' function.
 --
 -- The first element of the pair is prepended to the annotated region,
@@ -73,7 +73,7 @@ displayWrappedS = displayDecoratedA ((++) . fst) ((++) . snd) (++)
 
 -- | Display a rendered document as HTML and output a 'Monoid'.
 --
--- The annotated region is wrapped by 'span' with the 'class' attribute
+-- The annotated region is wrapped by @<span class="f a">..</span>@ with the @class@ attribute
 -- given by the annotation function.
 displayHTML :: Monoid o => (String -> o) -> (a -> String) -> SimpleDoc a -> o
 displayHTML f g = displayDecorated push pop str
@@ -83,21 +83,21 @@ displayHTML f g = displayDecorated push pop str
 
 -- | Display a rendered document as HTML and output 'Text'.
 --
--- The annotated region is wrapped by 'span' with the 'class' attribute
+-- The annotated region is wrapped by @<span class="f a">..</span>@ with the @class@ attribute
 -- given by the annotation function.
 displayHTMLT :: (a -> String) -> SimpleDoc a -> TL.Text
 displayHTMLT f = TL.toLazyText . displayHTML TL.fromString f
 
 -- | Display a rendered document as HTML and output a 'ShowS' function.
 --
--- The annotated region is wrapped by 'span' with the 'class' attribute
+-- The annotated region is wrapped by @<span class="f a">..</span>@ with the @class@ attribute
 -- given by the annotation function.
 displayHTMLS :: (a -> String) -> SimpleDoc a -> ShowS
 displayHTMLS f = (++) . displayHTML id f
 
 -- | Display a rendered document with ANSI escape sequences and output a 'Monoid'.
 --
--- The annotations are mapped to a '[SetStyle]' array.
+-- The annotations are mapped to a @[SetStyle]@ array.
 displayStyleCode :: Monoid o => (String -> o) -> (a -> [SetStyle]) -> Term -> SimpleDoc a -> o
 displayStyleCode f g term = runStyle term . displayDecoratedA push pop (pure . f)
  where push  x = f <$> styleCode (Save:g x)
@@ -129,14 +129,14 @@ hDisplayStyle h f = hRunWithStyle h [] . displayDecoratedA push pop (liftIO . hP
 displayStyle :: MonadIO m => (a -> [SetStyle]) -> SimpleDoc a -> m ()
 displayStyle = hDisplayStyle stdout
 
--- | The action @(putDocStyle f doc)@ pretty prints document @doc@ to standard output
+-- | The action @(putDocStyle f doc)@ pretty prints @doc@ to 'stdout'
 -- using the annotations.
 --
 -- The annotations are mapped by @f@ to @[SetStyle]@ arrays.
 putDocStyle :: (a -> [SetStyle]) -> Doc a -> IO ()
 putDocStyle = hPutDocStyle stdout
 
--- | The action @(hPutDocStyle handle f doc)@ pretty prints document @doc@ to file handle @handle@
+-- | The action @(hPutDocStyle handle f doc)@ pretty prints @doc@ to file handle @handle@
 -- using the annotations.
 --
 -- The annotations are mapped by @f@ to @[SetStyle]@ arrays.
