@@ -18,16 +18,19 @@ module Text.PrettyPrint.Console.WL (
   module Text.PrettyPrint.Annotated.WL
 
   -- * Display documents annotated with pairs of strings
-  , displayWrapped, displayWrappedT, displayWrappedS
+  , displayWrapped, displayWrappedT, displayWrappedB, displayWrappedS
 
   -- * Display as HTML
-  , displayHTML, displayHTMLT, displayHTMLS
+  , displayHTML, displayHTMLT, displayHTMLB, displayHTMLS
 
   -- * Display with ANSI escape sequences
-  , displayStyleCode, displayStyleCodeT, displayStyleCodeS
+  , displayStyleCode, displayStyleCodeT, displayStyleCodeB, displayStyleCodeS
 
   -- * Display to a file handle with ANSI escape sequences
   , hDisplayStyle, displayStyle, hPutDocStyle, putDocStyle
+
+  -- * Display without annotations (Missing from wl-pprint-annotated)
+  , displayB
 ) where
 
 import Text.PrettyPrint.Annotated.WL
@@ -36,6 +39,15 @@ import Control.Monad.Trans
 import System.IO (Handle, hPutStr, stdout)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as TL
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Builder as BL
+
+-- | @(display simpleDoc)@ takes the output @simpleDoc@ from a
+-- rendering function and outputs a 'ByteString'. Along the way, all annotations are
+-- discarded.
+displayB :: SimpleDoc a -> BL.ByteString
+displayB = BL.toLazyByteString . displayDecorated cm cm BL.stringUtf8
+ where cm = const mempty
 
 -- | Escape a HTML string by replacing special characters with HTML entities.
 escapeHTML :: String -> String
@@ -64,6 +76,14 @@ displayWrappedT :: SimpleDoc (String, String) -> TL.Text
 displayWrappedT = TL.toLazyText . displayWrapped TL.fromString
 
 -- | Display a rendered document which is annotated with pairs of strings @(String,String)@ and
+-- output 'ByteString'.
+--
+-- The first element of the pair is prepended to the annotated region,
+-- the second after the annotated region.
+displayWrappedB :: SimpleDoc (String, String) -> BL.ByteString
+displayWrappedB = BL.toLazyByteString . displayWrapped BL.stringUtf8
+
+-- | Display a rendered document which is annotated with pairs of strings @(String,String)@ and
 -- output a 'ShowS' function.
 --
 -- The first element of the pair is prepended to the annotated region,
@@ -87,6 +107,13 @@ displayHTML f g = displayDecorated push pop str
 -- given by the annotation function.
 displayHTMLT :: (a -> String) -> SimpleDoc a -> TL.Text
 displayHTMLT f = TL.toLazyText . displayHTML TL.fromString f
+
+-- | Display a rendered document as HTML and output 'ByteString'.
+--
+-- The annotated region is wrapped by @<span class="f a">..</span>@ with the @class@ attribute
+-- given by the annotation function.
+displayHTMLB :: (a -> String) -> SimpleDoc a -> BL.ByteString
+displayHTMLB f = BL.toLazyByteString . displayHTML BL.stringUtf8 f
 
 -- | Display a rendered document as HTML and output a 'ShowS' function.
 --
@@ -118,6 +145,12 @@ displayStyleCodeS f term = (++) . displayStyleCode id f term
 -- The annotations are mapped to a '[SetStyle]' array.
 displayStyleCodeT :: (a -> [SetStyle]) -> Term -> SimpleDoc a -> TL.Text
 displayStyleCodeT f term = TL.toLazyText . displayStyleCode TL.fromString f term
+
+-- | Display a rendered document with ANSI escape sequences and output 'ByteString'.
+--
+-- The annotations are mapped to a '[SetStyle]' array.
+displayStyleCodeB :: (a -> [SetStyle]) -> Term -> SimpleDoc a -> BL.ByteString
+displayStyleCodeB f term = BL.toLazyByteString . displayStyleCode BL.stringUtf8 f term
 
 -- | Display a rendered document with ANSI escape sequences to a given 'Handle'.
 --
