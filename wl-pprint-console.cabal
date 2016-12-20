@@ -26,6 +26,7 @@ source-repository head
 library
   hs-source-dirs:
       src
+  default-extensions: OverloadedStrings
   ghc-options: -Wall
   build-depends:
       base                >= 4.8 && < 5
