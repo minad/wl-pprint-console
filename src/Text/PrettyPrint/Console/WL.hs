@@ -24,18 +24,17 @@ module Text.PrettyPrint.Console.WL (
   , displayHTML, displayHTMLT, displayHTMLB, displayHTMLS
 
   -- * Display with ANSI escape sequences
-  , displayStyleCode, displayStyleCodeT, displayStyleCodeB, displayStyleCodeS
+  , displayColoredT, displayColoredB, displayColoredS
 
   -- * Display to a file handle with ANSI escape sequences
-  , hDisplayStyle, displayStyle, hPutDocStyle, putDocStyle
+  , displayColored, hPutDocColored, putDocColored
 
   -- * Display without annotations (Missing from wl-pprint-annotated)
   , displayB
 ) where
 
 import Text.PrettyPrint.Annotated.WL
-import System.Console.Style
-import Control.Monad.Trans
+import Data.Monoid.Colorful.Flat
 import System.IO (Handle, hPutStr, stdout)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Lazy.Builder as TL
@@ -122,62 +121,43 @@ displayHTMLB f = BL.toLazyByteString . displayHTML BL.stringUtf8 f
 displayHTMLS :: (a -> String) -> SimpleDoc a -> ShowS
 displayHTMLS f = (++) . displayHTML id f
 
--- | Display a rendered document with ANSI escape sequences and output a 'Monoid'.
---
--- The annotations are mapped to a @[SetStyle]@ array.
-displayStyleCode :: Monoid o => (String -> o) -> (a -> [SetStyle]) -> Term -> SimpleDoc a -> o
-displayStyleCode f g t d = runStyle t $
-  mappend <$>
-  displayDecoratedA push pop str d <*>
-  (f <$> applyStyleCode)
-  where push  x = changeStyle (Save:g x) >> pure mempty
-        pop   _ = changeStyle [Restore]  >> pure mempty
-        str   s = f . (`mappend` s) <$> applyStyleCode
-
 -- | Display a rendered document with ANSI escape sequences and output a 'ShowS' function.
 --
--- The annotations are mapped to a '[SetStyle]' array.
-displayStyleCodeS :: (a -> [SetStyle]) -> Term -> SimpleDoc a -> ShowS
-displayStyleCodeS f term = (++) . displayStyleCode id f term
+-- The annotations are mapped to a '[Colored a]' array.
+displayColoredS :: (a -> [Colored String]) -> Term -> SimpleDoc a -> ShowS
+displayColoredS f term = showColoredS term . displayColored id f
 
 -- | Display a rendered document with ANSI escape sequences and output 'Text'.
 --
--- The annotations are mapped to a '[SetStyle]' array.
-displayStyleCodeT :: (a -> [SetStyle]) -> Term -> SimpleDoc a -> TL.Text
-displayStyleCodeT f term = TL.toLazyText . displayStyleCode TL.fromString f term
+-- The annotations are mapped to a '[Colored TL.Builder]' array.
+displayColoredT :: (a -> [Colored TL.Builder]) -> Term -> SimpleDoc a -> TL.Text
+displayColoredT f term = TL.toLazyText . showColored id TL.fromString term . displayColored TL.fromString f
 
 -- | Display a rendered document with ANSI escape sequences and output 'ByteString'.
 --
--- The annotations are mapped to a '[SetStyle]' array.
-displayStyleCodeB :: (a -> [SetStyle]) -> Term -> SimpleDoc a -> BL.ByteString
-displayStyleCodeB f term = BL.toLazyByteString . displayStyleCode BL.stringUtf8 f term
+-- The annotations are mapped to a '[Colored BL.Builder]' array.
+displayColoredB :: (a -> [Colored BL.Builder]) -> Term -> SimpleDoc a -> BL.ByteString
+displayColoredB f term = BL.toLazyByteString . showColored id BL.stringUtf8 term . displayColored BL.stringUtf8 f
 
--- | Display a rendered document with ANSI escape sequences to a given 'Handle'.
+-- | Display a rendered document with ANSI escape sequences and output a 'Colored' array.
 --
--- The annotations are mapped to a '[SetStyle]' array.
-hDisplayStyle :: MonadIO m => Handle -> (a -> [SetStyle]) -> SimpleDoc a -> m ()
-hDisplayStyle h f d = hRunWithStyle h [] $
-  displayDecoratedA push pop str d >> applyStyle
-  where push  x = changeStyle (Save:f x)
-        pop   _ = changeStyle [Restore]
-        str   s = applyStyle >> liftIO (hPutStr h s)
+-- The annotations are mapped to a 'Colored' array.
+displayColored :: (String -> o) -> (a -> [Colored o]) -> SimpleDoc a -> [Colored o]
+displayColored f g d = displayDecoratedA push pop str d []
+  where push = (++) . (Push:) . g
+        pop = const (Pop:)
+        str = (++) . (:[]) . Value . f
 
--- | Display a rendered document with ANSI escape sequences to 'stdout'.
---
--- The annotations are mapped to a '[SetStyle]' array.
-displayStyle :: MonadIO m => (a -> [SetStyle]) -> SimpleDoc a -> m ()
-displayStyle = hDisplayStyle stdout
-
--- | The action @(putDocStyle f doc)@ pretty prints @doc@ to 'stdout'
+-- | The action @(putDocColored f doc)@ pretty prints @doc@ to 'stdout'
 -- using the annotations.
 --
--- The annotations are mapped by @f@ to @[SetStyle]@ arrays.
-putDocStyle :: (a -> [SetStyle]) -> Doc a -> IO ()
-putDocStyle = hPutDocStyle stdout
+-- The annotations are mapped by @f@ to 'Colored' arrays.
+putDocColored :: Term -> (a -> [Colored String]) -> Doc a -> IO ()
+putDocColored = hPutDocColored stdout
 
--- | The action @(hPutDocStyle handle f doc)@ pretty prints @doc@ to file handle @handle@
+-- | The action @(hPutDocColored handle f doc)@ pretty prints @doc@ to file handle @handle@
 -- using the annotations.
 --
--- The annotations are mapped by @f@ to @[SetStyle]@ arrays.
-hPutDocStyle :: Handle -> (a -> [SetStyle]) -> Doc a -> IO ()
-hPutDocStyle handle f = hDisplayStyle handle f . renderPrettyDefault
+-- The annotations are mapped by @f@ to 'Colored' arrays.
+hPutDocColored :: Handle -> Term -> (a -> [Colored String]) -> Doc a -> IO ()
+hPutDocColored handle term f = hPrintColored hPutStr handle term . displayColored id f . renderPrettyDefault

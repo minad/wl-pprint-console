@@ -1,6 +1,6 @@
 packages:
 - .
-- location: ../console-style
+- location: ../colorful-monoids
   extra-dep: true
 - location: ../wl-pprint-annotated
   extra-dep: true
