@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Text.PrettyPrint.Console.WL
--- Copyright   :  Daniel Mendler (c) 2016,
+-- Copyright   :  Daniel Mendler (c) 2017
 -- License     :  MIT (see the file LICENSE)
 --
 -- Maintainer  :  mail@daniel-mendler.de
@@ -15,6 +15,7 @@
 -----------------------------------------------------------
 
 module Text.PrettyPrint.Console.WL (
+  -- * Reexport of Text.PrettyPrint.Annotated.WL
   module Text.PrettyPrint.Annotated.WL
 
   -- * Display documents annotated with pairs of strings

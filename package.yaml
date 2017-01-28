@@ -6,7 +6,7 @@ category: Text
 stability: experimental
 author: Daniel Mendler <mail@daniel-mendler.de>
 maintainer: Daniel Mendler <mail@daniel-mendler.de>
-copyright: 2016 Daniel Mendler
+copyright: 2017 Daniel Mendler
 license: MIT
 github: minad/wl-pprint-console
 
