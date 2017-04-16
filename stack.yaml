@@ -1,7 +1,3 @@
 packages:
 - .
-- location: ../colorful-monoids
-  extra-dep: true
-- location: ../wl-pprint-annotated
-  extra-dep: true
-resolver: nightly-2016-11-25
+resolver: nightly-2017-04-09
