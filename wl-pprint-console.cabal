@@ -2,10 +2,10 @@
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 698a5038214eadde75070e79dd2349b8aec9e05dcb36b398f7f8c1162a34d94e
+-- hash: d2a411c93db512e0fb37b330e5dbe0fe9eaa25f1e493b479a12799fc8a0b3041
 
 name:           wl-pprint-console
-version:        0.1.0.1
+version:        0.1.0.2
 synopsis:       Wadler/Leijen pretty printer supporting colorful console output.
 description:    Wadler/Leijen pretty printer with support for annotations and colorful console output. Additional useful display routines are provided, e.g, for HTML output.
 category:       Text
