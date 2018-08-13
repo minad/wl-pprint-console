@@ -1,6 +1,8 @@
--- This file has been generated from package.yaml by hpack version 0.17.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
+--
+-- hash: 698a5038214eadde75070e79dd2349b8aec9e05dcb36b398f7f8c1162a34d94e
 
 name:           wl-pprint-console
 version:        0.1.0.1
@@ -15,7 +17,7 @@ maintainer:     Daniel Mendler <mail@daniel-mendler.de>
 copyright:      2017 Daniel Mendler
 license:        MIT
 license-file:   LICENSE
-tested-with:    GHC == 7.10.3, GHC == 8.0.1
+tested-with:    GHC == 7.10.3, GHC == 8.0.1, GHC == 8.2.1, GHC == 8.4.3, GHC == 8.6.1
 build-type:     Simple
 cabal-version:  >= 1.10
 
@@ -28,11 +30,13 @@ library
       src
   ghc-options: -Wall
   build-depends:
-      base                >= 4.8 && < 5
-    , colorful-monoids    >= 0.2 && < 0.3
-    , wl-pprint-annotated >= 0.0.1.2 && < 0.2
-    , text                >= 0.11 && < 1.3
-    , bytestring          >= 0.10.2 && < 0.11
+      base >=4.8 && <5
+    , bytestring >=0.10.2 && <0.11
+    , colorful-monoids >=0.2 && <0.3
+    , text >=0.11 && <1.3
+    , wl-pprint-annotated >=0.0.1.2 && <0.2
   exposed-modules:
       Text.PrettyPrint.Console.WL
+  other-modules:
+      Paths_wl_pprint_console
   default-language: Haskell2010
